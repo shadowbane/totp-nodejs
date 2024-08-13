@@ -1,0 +1,19 @@
+{
+  "name": "totp-nodejs",
+  "author": "Adli I. Ifkar <adly.shadowbane@gmail.com>",
+  "license": "MIT",
+  "main": "index.js",
+  "scripts": {
+    "dev": "tsx watch index.js"
+  },
+  "dependencies": {
+    "crypto": "^1.0.1",
+    "hi-base32": "^0.5.1",
+    "qrcode": "^1.5.4"
+  },
+  "devDependencies": {
+    "ts-node": "^10.9.2",
+    "tsx": "^4.16.2",
+    "typescript": "^5.5.3"
+  }
+}
