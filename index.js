@@ -29,7 +29,7 @@ function generateTOTP(secret, timeStep = 30, digits = 6, algorithm = 'sha1') {
   return otp.toString().padStart(digits, '0');
 }
 
-function generateQRCode(
+function generateQRCodeString(
     secret,
     accountName = 'user@example.com',
     issuer = 'MyApp',
@@ -38,6 +38,26 @@ function generateQRCode(
     algorithm = 'sha1'
 ) {
   const otpAuthUrl = `otpauth://totp/${issuer}:${accountName}?secret=${secret}&issuer=${issuer}&algorithm=${algorithm}&digits=${digits}&period=${timeStep}`;
+
+  return otpAuthUrl;
+}
+
+function generateQRCode(
+    secret,
+    accountName = 'user@example.com',
+    issuer = 'MyApp',
+    timeStep = 30,
+    digits = 6,
+    algorithm = 'sha1'
+) {
+  const otpAuthUrl = generateQRCodeString(
+    secret,
+    accountName,
+    issuer,
+    timeStep,
+    digits,
+    algorithm
+  );
 
   // Print QR code to console
   QRCode.toString(otpAuthUrl, { type: 'terminal' }, (err, url) => {
@@ -61,7 +81,8 @@ function autoRefreshTOTP(secret, timeStep = 30, digits = 6, algorithm = 'sha1') 
   refreshToken();
 }
 
-const secret = generateSecret();
+// const secret = generateSecret();
+const secret = "JBSWY3DPEHPK3PXP";
 const accountName = 'user@example.com';
 const issuer = 'MyApp';
 const timeStep = 30;

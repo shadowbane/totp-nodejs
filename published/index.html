@@ -1,0 +1,632 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TOTP Token Generator</title>
+    <!-- Tailwind CSS for styling -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- jsSHA for cryptographic hashing (HMAC) -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jsSHA/3.3.1/sha.js"></script>
+    <!-- QRious for QR code generation -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrious/4.0.2/qrious.min.js"></script>
+        <!-- Custom CSS for QR code centering -->
+        <style>
+            #qrcode-container {
+                display: flex;
+                justify-content: center;
+                align-items: center;
+            }
+            #qrcode {
+                display: block;
+                margin: 0 auto;
+            }
+        </style>
+    <!-- hi-base32 for base32 decoding -->
+    <script>
+        /*
+         * hi-base32 version 0.5.1
+         * Copyright (c) 2014-2021, Mark Rogers
+         * All rights reserved.
+         * License: BSD-3-Clause
+         * https://github.com/markrogers/hi-base32
+         */
+        var base32 = (function () {
+            'use strict';
+            var
+                VERSION = "0.5.1",
+                RFC4648 = "ABCDEFGHIJKLMNOPQRSTUVWXYZ234567",
+                RFC4648_HEX = "0123456789ABCDEFGHIJKLMNOPQRSTUV",
+                CROCKFORD = "0123456789ABCDEFGHJKMNPQRSTVWXYZ",
+                LOOKUP = null,
+                REVERSE_LOOKUP = null,
+                PADDING = '=',
+                options = {
+                    'include-padding': false,
+                    'char-map': RFC4648
+                };
+
+            function setOptions(opt) {
+                if (typeof opt['include-padding'] === 'boolean') {
+                    options['include-padding'] = opt['include-padding'];
+                }
+                if (typeof opt['char-map'] === 'string') {
+                    if (opt['char-map'].length !== 32) {
+                        throw new Error("Character map must be 32 characters long.");
+                    }
+                    options['char-map'] = opt['char-map'];
+                }
+            }
+
+            function getCharMap() {
+                return options['char-map'];
+            }
+
+            function b32decode(str) {
+                var i, j, len, decoded = [],
+                    caseSensitive = getCharMap() === RFC4648 || getCharMap() === RFC4648_HEX;
+
+                if (!caseSensitive) {
+                    str = str.toUpperCase();
+                }
+
+                if (REVERSE_LOOKUP === null) {
+                    REVERSE_LOOKUP = {};
+                    LOOKUP = getCharMap();
+                    for (i = 0; i < LOOKUP.length; i++) {
+                        REVERSE_LOOKUP[LOOKUP.charAt(i)] = i;
+                    }
+                }
+
+                len = str.length;
+                for (i = 0, j = 0; i < len; i++) {
+                    if (str.charAt(i) === PADDING) {
+                        break;
+                    }
+                    if (typeof REVERSE_LOOKUP[str.charAt(i)] === 'undefined') {
+                        throw new Error("Invalid character '" + str.charAt(i) + "' found in string.");
+                    }
+                }
+
+                if (i < len) {
+                    str = str.substr(0, i);
+                }
+
+                len = str.length;
+                for (i = 0, j = 0; i < len; i += 8) {
+                    decoded[j++] = (REVERSE_LOOKUP[str.charAt(i)] & 0x1f) << 3 | (REVERSE_LOOKUP[str.charAt(i + 1)] & 0x1c) >> 2;
+                    if (i + 3 >= len) {
+                        break;
+                    }
+                    decoded[j++] = (REVERSE_LOOKUP[str.charAt(i + 1)] & 0x03) << 6 | (REVERSE_LOOKUP[str.charAt(i + 2)] & 0x1f) << 1 | (REVERSE_LOOKUP[str.charAt(i + 3)] & 0x10) >> 4;
+                    if (i + 4 >= len) {
+                        break;
+                    }
+                    decoded[j++] = (REVERSE_LOOKUP[str.charAt(i + 3)] & 0x0f) << 4 | (REVERSE_LOOKUP[str.charAt(i + 4)] & 0x1e) >> 1;
+                    if (i + 6 >= len) {
+                        break;
+                    }
+                    decoded[j++] = (REVERSE_LOOKUP[str.charAt(i + 4)] & 0x01) << 7 | (REVERSE_LOOKUP[str.charAt(i + 5)] & 0x1f) << 2 | (REVERSE_LOOKUP[str.charAt(i + 6)] & 0x18) >> 3;
+                    if (i + 7 >= len) {
+                        break;
+                    }
+                    decoded[j++] = (REVERSE_LOOKUP[str.charAt(i + 6)] & 0x07) << 5 | (REVERSE_LOOKUP[str.charAt(i + 7)] & 0x1f);
+                }
+                return decoded;
+            }
+
+            function b32encode(bytes, opt) {
+                var i, j, len, encoded = "",
+                    padding = 0;
+                if (opt) {
+                    setOptions(opt);
+                }
+
+                if (Object.prototype.toString.call(bytes) !== "[object Array]") {
+                    throw new Error("hi-base32.encode expects an array of bytes");
+                }
+                LOOKUP = getCharMap();
+                len = bytes.length;
+                for (i = 0, j = 0; i < len; i += 5) {
+                    encoded += LOOKUP.charAt((bytes[i] & 0xf8) >> 3);
+                    if (i + 1 >= len) {
+                        encoded += LOOKUP.charAt((bytes[i] & 0x07) << 2);
+                        padding = 6;
+                        break;
+                    }
+                    encoded += LOOKUP.charAt(((bytes[i] & 0x07) << 2) | ((bytes[i + 1] & 0xc0) >> 6));
+                    encoded += LOOKUP.charAt((bytes[i + 1] & 0x3e) >> 1);
+                    if (i + 2 >= len) {
+                        encoded += LOOKUP.charAt((bytes[i + 1] & 0x01) << 4);
+                        padding = 4;
+                        break;
+                    }
+                    encoded += LOOKUP.charAt(((bytes[i + 1] & 0x01) << 4) | ((bytes[i + 2] & 0xf0) >> 4));
+                    encoded += LOOKUP.charAt(((bytes[i + 2] & 0x0f) << 1) | ((bytes[i + 3] & 0x80) >> 7));
+                    if (i + 3 >= len) {
+                        encoded += LOOKUP.charAt((bytes[i + 3] & 0x7c) >> 2);
+                        padding = 1;
+                        break;
+                    }
+                    encoded += LOOKUP.charAt(((bytes[i + 3] & 0x7c) >> 2));
+                    encoded += LOOKUP.charAt(((bytes[i + 3] & 0x03) << 3) | ((bytes[i + 4] & 0xe0) >> 5));
+                    encoded += LOOKUP.charAt((bytes[i + 4] & 0x1f));
+                }
+                if (options['include-padding']) {
+                    for (j = 0; j < padding; j++) {
+                        encoded += PADDING;
+                    }
+                }
+                return encoded;
+            }
+
+            return {
+                VERSION: VERSION,
+                encode: b32encode,
+                decode: {
+                    asBytes: b32decode,
+                }
+            };
+        })();
+    </script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 dark:bg-gray-900 text-gray-900 dark:text-gray-100 flex flex-col items-center justify-center min-h-screen py-10 relative">
+<div class="w-full max-w-4xl mx-auto p-6 md:p-8 bg-white dark:bg-gray-800 rounded-2xl shadow-lg">
+    <div class="text-center mb-8">
+        <h1 class="text-2xl md:text-3xl font-bold text-gray-800 dark:text-white">TOTP Token Generator</h1>
+        <p class="text-gray-500 dark:text-gray-400 mt-2">Enter your secret key and options to generate a token.</p>
+    </div>
+
+    <div class="flex flex-col md:flex-row gap-8">
+        <!-- Left Column - Input and Token Display -->
+        <div class="flex-1">
+            <div>
+                <label for="secret" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Secret Key</label>
+                <input type="text" id="secret" name="secret" placeholder="e.g., JBSWY3DPEHPK3PXP"
+                       class="w-full px-4 py-3 bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-800 dark:text-gray-200 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition duration-150"
+                       value="JBSWY3DPEHPK3PXP">
+                <p id="error-message" class="text-red-500 text-sm mt-2 h-5"></p>
+            </div>
+
+            <div class="mt-4 grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div>
+                    <label for="algorithm"
+                           class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Algorithm</label>
+                    <select id="algorithm" name="algorithm"
+                            class="w-full px-4 py-3 bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-800 dark:text-gray-200 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition duration-150">
+                        <option value="SHA-1">SHA-1</option>
+                        <option value="SHA-256" selected>SHA-256</option>
+                        <option value="SHA-512">SHA-512</option>
+                    </select>
+                </div>
+                <div>
+                    <label for="timestep" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Time
+                        Step</label>
+                    <input type="number" id="timestep" name="timestep" value="30"
+                           class="w-full px-4 py-3 bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-800 dark:text-gray-200 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition duration-150">
+                </div>
+                <div>
+                    <label for="digits" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Digits</label>
+                    <input type="number" id="digits" name="digits" value="6"
+                           class="w-full px-4 py-3 bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-800 dark:text-gray-200 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition duration-150">
+                </div>
+            </div>
+
+            <div class="mt-6">
+                <div id="token-display" class="hidden">
+                    <p class="text-center text-sm text-gray-500 dark:text-gray-400">Generated Token</p>
+                    <div class="flex items-center justify-center mt-2 bg-gray-100 dark:bg-gray-700 p-4 rounded-lg">
+                        <p id="token" class="text-4xl font-bold tracking-widest text-blue-600 dark:text-blue-400">------</p>
+                        <button id="copy-button"
+                                class="ml-4 p-2 text-gray-500 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-300 rounded-full hover:bg-gray-200 dark:hover:bg-gray-600 transition">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                                 stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                                <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+                            </svg>
+                        </button>
+                    </div>
+                    <p id="copy-feedback" class="text-center text-green-500 text-sm mt-2 h-5"></p>
+                </div>
+            </div>
+
+            <div class="mt-6">
+                <p class="text-center text-sm text-gray-500 dark:text-gray-400 mb-2">Token expires in <span id="time-remaining">30</span>s
+                </p>
+                <div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2.5">
+                    <div id="progress-bar"
+                         class="bg-blue-600 h-2.5 rounded-full transition-all duration-1000 ease-linear"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Right Column - QR Code -->
+        <div class="flex-1 flex flex-col items-center justify-center border-2 border-gray-300 dark:border-gray-600 rounded-lg p-6">
+            <div class="text-center">
+                <div id="qrcode-container" class="mb-4 flex justify-center">
+                    <canvas id="qrcode" width="200" height="200" class="bg-white p-2 rounded"></canvas>
+                </div>
+                <h3 class="text-lg font-medium text-gray-700 dark:text-gray-300">Scan with Authenticator App</h3>
+                <p class="text-sm text-gray-500 dark:text-gray-400 mt-2">
+                    Use Google Authenticator, Microsoft Authenticator, Authy, or any other TOTP app
+                </p>
+                <div class="mt-4">
+                    <div class="flex flex-col space-y-2">
+                        <div class="flex items-center">
+                            <label for="issuer" class="block text-sm font-medium text-gray-700 dark:text-gray-300 w-1/3">Issuer:</label>
+                            <input type="text" id="issuer" name="issuer" value="MyApp" 
+                                   class="flex-1 px-3 py-2 bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-800 dark:text-gray-200 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition duration-150 text-sm">
+                        </div>
+                        <div class="flex items-center">
+                            <label for="account" class="block text-sm font-medium text-gray-700 dark:text-gray-300 w-1/3">Account:</label>
+                            <input type="text" id="account" name="account" value="user@example.com" 
+                                   class="flex-1 px-3 py-2 bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-800 dark:text-gray-200 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition duration-150 text-sm">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // DOM Elements
+    const secretInput = document.getElementById('secret');
+    const algorithmSelect = document.getElementById('algorithm');
+    const timestepInput = document.getElementById('timestep');
+    const digitsInput = document.getElementById('digits');
+    const tokenDisplay = document.getElementById('token-display');
+    const tokenElement = document.getElementById('token');
+    const timeRemainingElement = document.getElementById('time-remaining');
+    const progressBar = document.getElementById('progress-bar');
+    const copyButton = document.getElementById('copy-button');
+    const copyFeedback = document.getElementById('copy-feedback');
+    const errorMessage = document.getElementById('error-message');
+    const issuerInput = document.getElementById('issuer');
+    const accountInput = document.getElementById('account');
+
+    let intervalId = null;
+    let qrCode = null;
+
+    /**
+     * Converts a Uint8Array to a hex string.
+     * @param {Uint8Array} bytes The byte array to convert.
+     * @returns {string} The hex string.
+     */
+    function toHex(bytes) {
+        return Array.from(bytes, byte => byte.toString(16).padStart(2, '0')).join('');
+    }
+
+    /**
+     * Generates a TOTP token based on a secret key.
+     * This function is an adaptation of the Node.js code to work in a browser environment.
+     * @param {string} secret - The base32 encoded secret key.
+     * @param {number} timeStep - The time step in seconds.
+     * @param {number} digits - The number of digits for the token.
+     * @param {string} algorithm - The HMAC algorithm.
+     * @returns {string|null} The generated TOTP token, or null if an error occurs.
+     */
+    function generateTOTP(secret, timeStep, digits, algorithm) {
+        try {
+            // 1. Decode the base32 secret.
+            const decodedSecret = new Uint8Array(base32.decode.asBytes(secret.toUpperCase().replace(/\s/g, '')));
+            if (decodedSecret.length === 0) {
+                throw new Error("Invalid secret key.");
+            }
+
+            // 2. Get the current time counter.
+            const time = Math.floor(Date.now() / 1000);
+            const counter = Math.floor(time / timeStep);
+
+            // 3. Create an 8-byte buffer for the counter.
+            // TOTP uses a 64-bit counter, but JS numbers are safe for a long time.
+            // We write the 32-bit counter value into the last 4 bytes of the buffer in big-endian format.
+            const counterBuffer = new ArrayBuffer(8);
+            const dataView = new DataView(counterBuffer);
+            dataView.setUint32(4, counter, false);
+
+            // 4. Compute the HMAC-SHA hash. The jsSHA library is used here.
+            const shaObj = new jsSHA(algorithm, "UINT8ARRAY");
+            shaObj.setHMACKey(decodedSecret, "UINT8ARRAY");
+            shaObj.update(new Uint8Array(counterBuffer));
+            const hash = shaObj.getHMAC("UINT8ARRAY");
+
+            // 5. Perform dynamic truncation to get the OTP.
+            // Find the offset from the last nibble of the hash.
+            const offset = hash[hash.length - 1] & 0x0f;
+            // Get a 31-bit slice of the hash starting at the offset.
+            const binary =
+                ((hash[offset] & 0x7f) << 24) |
+                ((hash[offset + 1] & 0xff) << 16) |
+                ((hash[offset + 2] & 0xff) << 8) |
+                (hash[offset + 3] & 0xff);
+
+            // 6. The result is the binary value modulo 10^digits.
+            const otp = binary % Math.pow(10, digits);
+
+            // 7. Pad the OTP with leading zeros if necessary.
+            return otp.toString().padStart(digits, '0');
+
+        } catch (error) {
+            console.error("Error generating TOTP:", error);
+            errorMessage.textContent = error.message || "Could not generate token.";
+            return null;
+        }
+    }
+
+    /**
+     * Generates the otpauth URL for QR code generation.
+     * @param {string} secret - The base32 encoded secret key.
+     * @param {string} accountName - The account name.
+     * @param {string} issuer - The issuer name.
+     * @param {string} algorithm - The HMAC algorithm.
+     * @param {number} digits - The number of digits for the token.
+     * @param {number} timeStep - The time step in seconds.
+     * @returns {string} The otpauth URL.
+     */
+    function generateOtpAuthUrl(secret, accountName, issuer, algorithm, digits, timeStep) {
+        let algo = algorithm.replace('-', '');
+
+        // URL encode parameters to handle special characters
+        const encodedIssuer = encodeURIComponent(issuer);
+        const encodedAccount = encodeURIComponent(accountName);
+
+        return `otpauth://totp/${encodedIssuer}:${encodedAccount}?secret=${secret}&issuer=${encodedIssuer}&algorithm=${algo}&digits=${digits}&period=${timeStep}`;
+    }
+
+    /**
+     * Updates the QR code with the current parameters.
+     */
+    function updateQRCode() {
+        const secret = secretInput.value.trim();
+        const algorithm = algorithmSelect.value;
+        const timeStep = parseInt(timestepInput.value) || 30;
+        const digits = parseInt(digitsInput.value) || 6;
+        const issuer = issuerInput.value.trim() || 'MyApp';
+        const account = accountInput.value.trim() || 'user@example.com';
+
+        if (!secret) {
+            return;
+        }
+
+        const otpAuthUrl = generateOtpAuthUrl(secret, account, issuer, algorithm, digits, timeStep);
+
+        if (!qrCode) {
+            // Get the canvas element
+            const canvas = document.getElementById('qrcode');
+
+            // Create QR code with explicit size matching canvas
+            qrCode = new QRious({
+                element: canvas,
+                size: 200,
+                value: otpAuthUrl,
+                level: 'H', // High error correction level
+                background: 'white',
+                foreground: 'black',
+                padding: null // Remove padding to fix centering issue
+            });
+
+            // Fix centering by adjusting the canvas context
+            const ctx = canvas.getContext('2d');
+
+            // Wait a moment to ensure QR code is fully generated
+            setTimeout(() => {
+                // Check if _qr and modules are defined before accessing them
+                if (qrCode._qr && qrCode._qr.modules) {
+                    const qrSize = qrCode._qr.modules.size * qrCode._qr.modules.scale;
+                    const offset = (200 - qrSize) / 2;
+
+                    // Clear the canvas and redraw the QR code centered
+                    if (offset > 0) {
+                        const imgData = ctx.getImageData(0, 0, qrSize, qrSize);
+                        ctx.clearRect(0, 0, canvas.width, canvas.height);
+                        ctx.putImageData(imgData, offset, offset);
+                    }
+                }
+            }, 10);
+        } else {
+            qrCode.value = otpAuthUrl;
+
+            // Reapply centering fix when QR code value changes
+            const canvas = document.getElementById('qrcode');
+            const ctx = canvas.getContext('2d');
+
+            // Wait for QRious to redraw and ensure _qr is available
+            setTimeout(() => {
+                // Check if _qr and modules are defined before accessing them
+                if (qrCode._qr && qrCode._qr.modules) {
+                    const qrSize = qrCode._qr.modules.size * qrCode._qr.modules.scale;
+                    const offset = (200 - qrSize) / 2;
+
+                    // Clear the canvas and redraw the QR code centered
+                    if (offset > 0) {
+                        const imgData = ctx.getImageData(0, 0, qrSize, qrSize);
+                        ctx.clearRect(0, 0, canvas.width, canvas.height);
+                        ctx.putImageData(imgData, offset, offset);
+                    }
+                }
+            }, 10); // Slightly longer timeout to ensure QR code is fully generated
+        }
+    }
+
+    /**
+     * Main function to update the UI with a new token and progress bar.
+     */
+    function updateToken() {
+        const secret = secretInput.value.trim();
+        const algorithm = algorithmSelect.value;
+        const timeStep = parseInt(timestepInput.value) || 30;
+        const digits = parseInt(digitsInput.value) || 6;
+
+        errorMessage.textContent = '';
+
+        // Stop refresh if secret is removed
+        if (!secret) {
+            tokenDisplay.classList.add('hidden');
+            if (intervalId) clearInterval(intervalId);
+            intervalId = null;
+            return;
+        }
+
+        const token = generateTOTP(secret, timeStep, digits, algorithm);
+
+        if (token) {
+            tokenDisplay.classList.remove('hidden');
+            tokenElement.textContent = token.slice(0, 3) + ' ' + token.slice(3);
+
+            // Update QR code
+            updateQRCode();
+        } else {
+            tokenDisplay.classList.add('hidden');
+            if (intervalId) clearInterval(intervalId);
+            intervalId = null;
+        }
+
+        // Update the progress bar and timer
+        const time = Math.floor(Date.now() / 1000);
+        const remaining = timeStep - (time % timeStep);
+
+        timeRemainingElement.textContent = remaining;
+        progressBar.style.width = `${(remaining / timeStep) * 100}%`;
+    }
+
+    /**
+     * Starts or restarts the token generation loop.
+     */
+    function startTokenGeneration() {
+        if (intervalId) {
+            clearInterval(intervalId);
+        }
+        updateToken();
+        intervalId = setInterval(updateToken, 1000);
+    }
+
+    // Function to save input values to localStorage
+    function saveToLocalStorage() {
+        localStorage.setItem('totp_secret', secretInput.value);
+        localStorage.setItem('totp_algorithm', algorithmSelect.value);
+        localStorage.setItem('totp_timestep', timestepInput.value);
+        localStorage.setItem('totp_digits', digitsInput.value);
+        localStorage.setItem('totp_issuer', issuerInput.value);
+        localStorage.setItem('totp_account', accountInput.value);
+    }
+
+    // Event Listeners
+    secretInput.addEventListener('input', () => {
+        startTokenGeneration();
+        saveToLocalStorage();
+    });
+    algorithmSelect.addEventListener('change', () => {
+        startTokenGeneration();
+        saveToLocalStorage();
+    });
+    timestepInput.addEventListener('input', () => {
+        startTokenGeneration();
+        saveToLocalStorage();
+    });
+    digitsInput.addEventListener('input', () => {
+        startTokenGeneration();
+        saveToLocalStorage();
+    });
+
+    // Add event listeners for QR code parameters
+    issuerInput.addEventListener('input', () => {
+        updateQRCode();
+        saveToLocalStorage();
+    });
+    accountInput.addEventListener('input', () => {
+        updateQRCode();
+        saveToLocalStorage();
+    });
+
+    copyButton.addEventListener('click', () => {
+        const tokenToCopy = tokenElement.textContent.replace(/\s/g, '');
+
+        const showFeedback = (message, isError = false) => {
+            copyFeedback.textContent = message;
+            copyFeedback.className = isError
+                ? 'text-center text-red-500 text-sm mt-2 h-5'
+                : 'text-center text-green-500 text-sm mt-2 h-5';
+            setTimeout(() => {
+                copyFeedback.textContent = '';
+            }, 2000);
+        };
+
+        if (!navigator.clipboard) {
+            // Fallback for older browsers
+            const textarea = document.createElement('textarea');
+            textarea.value = tokenToCopy;
+            textarea.style.position = 'fixed';
+            document.body.appendChild(textarea);
+            textarea.focus();
+            textarea.select();
+            try {
+                const successful = document.execCommand('copy');
+                if (successful) {
+                    showFeedback('Copied to clipboard!');
+                } else {
+                    showFeedback('Failed to copy!', true);
+                }
+            } catch (err) {
+                showFeedback('Failed to copy!', true);
+                console.error('Fallback copy failed: ', err);
+            }
+            document.body.removeChild(textarea);
+        } else {
+            // Modern approach
+            navigator.clipboard.writeText(tokenToCopy).then(
+                () => {
+                    showFeedback('Copied to clipboard!');
+                }
+            ).catch(
+                (err) => {
+                    showFeedback('Failed to copy!', true);
+                    console.error('Async copy failed: ', err);
+                }
+            );
+        }
+    });
+
+    // Initial Load
+    window.addEventListener('load', () => {
+        // Load values from localStorage if they exist
+        if (localStorage.getItem('totp_secret')) {
+            secretInput.value = localStorage.getItem('totp_secret');
+        }
+        if (localStorage.getItem('totp_algorithm')) {
+            algorithmSelect.value = localStorage.getItem('totp_algorithm');
+        }
+        if (localStorage.getItem('totp_timestep')) {
+            timestepInput.value = localStorage.getItem('totp_timestep');
+        }
+        if (localStorage.getItem('totp_digits')) {
+            digitsInput.value = localStorage.getItem('totp_digits');
+        }
+        if (localStorage.getItem('totp_issuer')) {
+            issuerInput.value = localStorage.getItem('totp_issuer');
+        }
+        if (localStorage.getItem('totp_account')) {
+            accountInput.value = localStorage.getItem('totp_account');
+        }
+
+        // If there's a secret (either default or from localStorage), start generating on load.
+        if (secretInput.value) {
+            startTokenGeneration();
+            // Initial QR code generation
+            updateQRCode();
+        }
+    });
+</script>
+
+<footer class="text-center text-gray-500 dark:text-gray-400 text-sm mt-8 mb-4 w-full">
+    Built by <a href="https://github.com/shadowbane" class="text-blue-500 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300">Shadowbane</a>
+</footer>
+</body>
+</html>
