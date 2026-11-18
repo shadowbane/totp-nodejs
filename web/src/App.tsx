@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { Generator } from './components/Generator'
 import { Privacy, Terms } from './components/Legal'
+import { PromoCard } from './components/Promo'
 import { VaultPanel } from './components/Vault'
 import { ArrowUpRightIcon, DEVHELPER_URL, GitHubIcon, REPO_URL, Section, ThemeToggle, TickMark } from './components/ui'
 import { useNow } from './lib/hooks'
@@ -77,6 +78,7 @@ function Home() {
         <p className="mt-5 max-w-[600px] text-base leading-relaxed text-ink-2">
           Paste a secret key or an otpauth:// link and get the current code. Long keys work. Nothing you type leaves this page.
         </p>
+        <PromoCard />
       </section>
 
       <Section id="generator" n="01" label="Generator" title="Make a code.">

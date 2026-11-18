@@ -90,10 +90,13 @@ export function Privacy() {
       <Clause n="04" title="The host">
         <p>The site is served by Cloudflare. Like any website, delivering the page involves standard request data such as your IP address and browser type, which Cloudflare processes under its own <A href="https://www.cloudflare.com/privacypolicy/">privacy policy</A>. Tick adds no cookies, tracking or analytics.</p>
       </Clause>
-      <Clause n="05" title="Changes">
+      <Clause n="05" title="Links out">
+        <p>Tick shows a link to our partner ZapYap, a zero-knowledge password manager and authenticator. The link carries <span className="font-mono text-[13px]">utm</span> tags naming Tick as the source, so ZapYap can count visits from here. Tick sends nothing else about you, and your keys are never part of it. ZapYap has its own privacy policy.</p>
+      </Clause>
+      <Clause n="06" title="Changes">
         <p>If this policy changes, the date at the top will change with it.</p>
       </Clause>
-      <Clause n="06" title="Contact">
+      <Clause n="07" title="Contact">
         <p>Questions about privacy: <A href={`mailto:${CONTACT_EMAIL}`}>{CONTACT_EMAIL}</A>.</p>
       </Clause>
     </LegalPage>

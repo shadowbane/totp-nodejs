@@ -7,6 +7,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.1.0] - 2026-11-18
+
+### Added
+
+- A card between the intro and the generator recommends our partner ZapYap, a zero-knowledge password manager and authenticator that works across devices.
+- The privacy page explains the ZapYap link and its `utm` tags.
+
+### Changed
+
+- Pages are served with `Cache-Control: no-transform`, so Cloudflare does not inject its Web Analytics script, which the CSP would block.
+
 ## [1.0.0] - 2026-11-18
 
 First versioned release. The web tool is renamed **Tick** and joins the DevHelper suite. It stays at <https://totp.devhelper.my.id>.
@@ -42,5 +53,6 @@ First versioned release. The web tool is renamed **Tick** and joins the DevHelpe
 
 - Saved secrets are encrypted at rest. A forgotten passphrase cannot be recovered.
 
-[Unreleased]: https://github.com/shadowbane/totp-nodejs/compare/v1.0.0...HEAD
+[Unreleased]: https://github.com/shadowbane/totp-nodejs/compare/v1.1.0...HEAD
+[1.1.0]: https://github.com/shadowbane/totp-nodejs/compare/v1.0.0...v1.1.0
 [1.0.0]: https://github.com/shadowbane/totp-nodejs/releases/tag/v1.0.0

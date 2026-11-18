@@ -60,7 +60,7 @@ export function Generator({ value, onChange, now }: {
           autoCapitalize="characters"
           autoComplete="off"
           autoCorrect="off"
-          placeholder="JBSW Y3DP EHPK 3PXP …  or an otpauth:// link"
+          placeholder="Paste a key or an otpauth:// link"
           aria-invalid={!empty && !check.ok}
           aria-describedby="secret-status"
           className={`input secret-field mt-2 resize-none font-mono text-[14px] leading-relaxed ${masked ? 'secret-masked' : ''}`}
