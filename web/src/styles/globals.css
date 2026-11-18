@@ -1,0 +1,210 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ── Tick design tokens ─────────────────────────────────────────────────
+   DevHelper's cool slate neutrals (shared with Lens) with Tick's violet
+   accent. Components only use these variables, never raw colors. */
+
+:root {
+  color-scheme: light;
+
+  --bg: oklch(0.992 0.002 220);
+  --surface: oklch(0.972 0.004 220);
+  --frame: oklch(1 0 0);
+
+  --ink: oklch(0.21 0.015 240);
+  --ink-2: oklch(0.42 0.014 240);
+  --ink-3: oklch(0.54 0.012 240);
+
+  --rule: oklch(0.915 0.006 230);
+  --rule-2: oklch(0.85 0.008 230);
+  --rule-ink: oklch(0.21 0.015 240);
+
+  --brand: oklch(0.56 0.19 290);
+  --brand-ink: oklch(0.47 0.17 288);
+  --brand-wash: oklch(0.56 0.19 290 / 0.1);
+
+  --positive: oklch(0.5 0.12 150);
+  --positive-wash: oklch(0.6 0.13 150 / 0.12);
+  --negative: oklch(0.54 0.2 25);
+  --negative-wash: oklch(0.6 0.2 25 / 0.1);
+  --warn: oklch(0.55 0.12 75);
+  --warn-wash: oklch(0.72 0.14 80 / 0.16);
+  --info: oklch(0.5 0.14 255);
+  --violet: oklch(0.5 0.16 300);
+
+  --btn-bg: oklch(0.21 0.015 240);
+  --btn-fg: oklch(0.99 0 0);
+
+  --selection: oklch(0.56 0.19 290 / 0.22);
+  --shadow-frame: 0 1px 2px oklch(0.25 0.02 240 / 0.05), 0 20px 44px -26px oklch(0.25 0.02 240 / 0.28);
+  --pill-bg: oklch(1 0 0 / 0.9);
+  --pill-border: oklch(0.87 0.008 230);
+  --pill-shadow: 0 1px 2px oklch(0.25 0.02 240 / 0.06), 0 12px 30px -14px oklch(0.25 0.02 240 / 0.32);
+  --scrim: oklch(0.25 0.02 240 / 0.38);
+}
+
+:root[data-theme='dark'] {
+  color-scheme: dark;
+
+  --bg: oklch(0.17 0.01 240);
+  --surface: oklch(0.205 0.011 240);
+  --frame: oklch(0.19 0.01 240);
+
+  --ink: oklch(0.95 0.005 220);
+  --ink-2: oklch(0.78 0.008 225);
+  --ink-3: oklch(0.66 0.01 230);
+
+  --rule: oklch(0.9 0.02 230 / 0.1);
+  --rule-2: oklch(0.9 0.02 230 / 0.18);
+  --rule-ink: oklch(0.9 0.02 230 / 0.45);
+
+  --brand: oklch(0.74 0.14 292);
+  --brand-ink: oklch(0.81 0.11 292);
+  --brand-wash: oklch(0.74 0.14 292 / 0.15);
+
+  --positive: oklch(0.78 0.14 150);
+  --positive-wash: oklch(0.72 0.14 150 / 0.14);
+  --negative: oklch(0.72 0.17 25);
+  --negative-wash: oklch(0.72 0.17 25 / 0.14);
+  --warn: oklch(0.82 0.12 82);
+  --warn-wash: oklch(0.82 0.12 82 / 0.13);
+  --info: oklch(0.76 0.11 250);
+  --violet: oklch(0.77 0.12 300);
+
+  --btn-bg: oklch(0.95 0.005 220);
+  --btn-fg: oklch(0.18 0.01 240);
+
+  --selection: oklch(0.74 0.14 292 / 0.3);
+  --shadow-frame: 0 0 0 1px oklch(1 0 0 / 0.02);
+  --pill-bg: oklch(0.24 0.012 240 / 0.9);
+  --pill-border: oklch(0.9 0.02 230 / 0.16);
+  --pill-shadow: 0 1px 2px oklch(0 0 0 / 0.3), 0 12px 30px -14px oklch(0 0 0 / 0.7);
+  --scrim: oklch(0 0 0 / 0.6);
+}
+
+@layer base {
+  *,
+  ::before,
+  ::after {
+    border-color: var(--rule);
+  }
+
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: var(--rule-2) transparent;
+  }
+
+  html {
+    background: var(--bg);
+  }
+
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--ink);
+    font-size: 14px;
+    line-height: 1.55;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+  }
+
+  ::selection {
+    background: var(--selection);
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--brand);
+    outline-offset: 2px;
+  }
+
+  code,
+  pre,
+  kbd {
+    font-family: theme('fontFamily.mono');
+  }
+}
+
+@layer components {
+  /* Buttons */
+  .btn {
+    @apply inline-flex h-9 shrink-0 items-center justify-center gap-2 whitespace-nowrap rounded-lg px-3.5 text-sm font-medium transition-colors duration-150;
+  }
+  .btn:disabled {
+    @apply cursor-not-allowed opacity-50;
+  }
+  .btn-sm {
+    @apply h-8 gap-1.5 rounded-md px-2.5 text-[13px];
+  }
+  .btn-lg {
+    @apply h-11 px-5 text-[15px];
+  }
+  .btn-primary {
+    background: var(--btn-bg);
+    color: var(--btn-fg);
+  }
+  .btn-primary:hover:not(:disabled) {
+    opacity: 0.86;
+  }
+  .btn-secondary {
+    @apply border border-rule-2 bg-frame text-ink;
+  }
+  .btn-secondary:hover:not(:disabled) {
+    @apply bg-surface;
+  }
+  .btn-ghost {
+    @apply text-ink-2;
+  }
+  .btn-ghost:hover:not(:disabled) {
+    @apply bg-surface text-ink;
+  }
+  .btn-danger {
+    @apply bg-negative;
+    color: var(--bg);
+  }
+  .btn-danger:hover:not(:disabled) {
+    opacity: 0.88;
+  }
+
+  /* Form fields */
+  .input {
+    @apply h-10 w-full rounded-lg border border-rule-2 bg-frame px-3 text-sm text-ink outline-none transition-colors duration-150 placeholder:text-ink-3;
+  }
+  .input:focus {
+    border-color: var(--brand);
+    box-shadow: 0 0 0 3px var(--brand-wash);
+  }
+  textarea.input {
+    @apply h-auto py-2.5 leading-relaxed;
+  }
+  .field-label {
+    @apply mb-1.5 block text-[13px] font-medium text-ink;
+  }
+  .field-error {
+    @apply mt-1.5 text-[13px] text-negative;
+  }
+
+  /* Small mono caption, used for section labels and metadata */
+  .eyebrow {
+    @apply font-mono text-[11px] uppercase tracking-[0.08em] text-ink-3;
+  }
+
+  .alert-error {
+    @apply rounded-lg border border-negative bg-negative-wash px-3.5 py-2.5 text-[13px] text-negative;
+  }
+}
+
+/* A secret can be long: wrap anywhere, never scroll sideways. */
+.secret-field {
+  word-break: break-all;
+  overflow-wrap: anywhere;
+}
+.secret-masked {
+  -webkit-text-security: disc;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, ::before, ::after { transition-duration: 0ms !important; animation-duration: 0ms !important; }
+}
