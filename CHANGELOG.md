@@ -17,6 +17,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 
 - Pages are served with `Cache-Control: no-transform`, so Cloudflare does not inject its Web Analytics script, which the CSP would block.
+- `web/wrangler.toml` targets the `totp-nodejs` Worker, which deploys from this repo through Workers Builds. The README lists the build settings (root directory `web`).
+- The secret key placeholder is shorter, so it no longer wraps mid-word on phones.
+
+### Fixed
+
+- Every page logged a console error because the CSP blocked the injected Cloudflare analytics script.
 
 ## [1.0.0] - 2026-11-18
 
