@@ -7,7 +7,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-## [1.1.0] - 2026-11-18
+## [2.1.0] - 2026-11-18
 
 ### Added
 
@@ -24,9 +24,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Every page logged a console error because the CSP blocked the injected Cloudflare analytics script.
 
-## [1.0.0] - 2026-11-18
+## [2.0.0] - 2026-11-18
 
-First versioned release. The web tool is renamed **Tick** and joins the DevHelper suite. It stays at <https://totp.devhelper.my.id>.
+The web tool is renamed **Tick** and joins the DevHelper suite. It stays at <https://totp.devhelper.my.id>.
 
 ### Added
 
@@ -59,6 +59,14 @@ First versioned release. The web tool is renamed **Tick** and joins the DevHelpe
 
 - Saved secrets are encrypted at rest. A forgotten passphrase cannot be recovered.
 
-[Unreleased]: https://github.com/shadowbane/totp-nodejs/compare/v1.1.0...HEAD
-[1.1.0]: https://github.com/shadowbane/totp-nodejs/compare/v1.0.0...v1.1.0
+## [1.0.0] - 2024-08-13
+
+### Added
+
+- Node CLI (`index.js`) that generates a TOTP secret, prints the current code every 30 seconds, and shows an `otpauth://` QR code in the terminal.
+- A single-page browser generator (`published/index.html`) followed later, untagged.
+
+[Unreleased]: https://github.com/shadowbane/totp-nodejs/compare/v2.1.0...HEAD
+[2.1.0]: https://github.com/shadowbane/totp-nodejs/compare/v2.0.0...v2.1.0
+[2.0.0]: https://github.com/shadowbane/totp-nodejs/compare/v1.0.0...v2.0.0
 [1.0.0]: https://github.com/shadowbane/totp-nodejs/releases/tag/v1.0.0
