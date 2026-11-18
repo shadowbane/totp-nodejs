@@ -48,13 +48,15 @@ pnpm build      # type-check and build to web/dist
 
 ## Deploy
 
-Tick is served by Cloudflare Workers static assets (`web/wrangler.toml`).
+Tick is served by Cloudflare Workers static assets (`web/wrangler.toml`, Worker `totp-nodejs`). The Worker is connected to this repo with Workers Builds, so every push to `master` deploys. Its build settings:
 
-```sh
-cd web
-pnpm build
-npx wrangler deploy
-```
+| Setting | Value |
+| --- | --- |
+| Root directory | `web` |
+| Build command | `pnpm install --frozen-lockfile && pnpm build` |
+| Deploy command | `npx wrangler deploy` |
+
+To deploy by hand instead: `cd web && pnpm build && npx wrangler deploy`.
 
 `_headers` only takes effect on Cloudflare. `vite preview` does not apply it, so test the CSP with `npx wrangler dev` after a build.
 
