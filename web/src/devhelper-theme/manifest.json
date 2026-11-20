@@ -1,0 +1,20 @@
+{
+  "version": "1.0.1",
+  "product": "tick",
+  "kind": "react",
+  "files": {
+    "fonts/OFL-geist.txt": "1781d2806a07d91c4edf4740b88449fab7d0eadad53f7c351b94cd4d4eb8c00f",
+    "fonts/OFL-geistmono.txt": "1781d2806a07d91c4edf4740b88449fab7d0eadad53f7c351b94cd4d4eb8c00f",
+    "fonts/OFL-instrumentserif.txt": "129ed7618959716959f2941fdd5b49e0ad6e6c1d78726761786a00253d865521",
+    "fonts/geist-mono.woff2": "5f3d6ad60f29d6cb708414ec6887163d63bf197377ef5417d2483ff31ace6c3b",
+    "fonts/geist.woff2": "9b6f5ff45b278c744b5f379a2c4ecbaf858a842b8eaf82ac8d21b699ca16c608",
+    "fonts/instrument-serif.woff2": "60c06664b5a95c7de6cc3e00d1f9034d78bd1e40b564016b241674449a067d4d",
+    "theme.css": "ffa41451e6d728bea421532ea91c2869a88f079a96ce9411c05a354d7b974364",
+    "components.css": "c4c9fa3e99d12456973136031fa6c1070f7a07075f63e6704b1c3783bc430745",
+    "theme.js": "883fe63fb24a33c3f08dcfe73a0ff0015637d4b173414e623dd1e0bfe51f1421",
+    "useTheme.ts": "4cf2827673c8580923071df516d7760f2314b246c9ff3a02333b69c4e865fd84",
+    "ThemeToggle.tsx": "3583457d453cef5bac68a59fb5b055c90986c1a6fca51627cf8d332e545a9240",
+    "tailwind-preset.js": "7e388fbfc2d28c3c468bfe4730f40bd9dfb76efb457beb7b2c4f18e8b0745615",
+    "check.mjs": "a4e9ee93767593402b23583e297246154364ef3c5f70c6c404bcb8fbd5e99df1"
+  }
+}
