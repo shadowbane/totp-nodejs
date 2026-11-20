@@ -13,7 +13,7 @@ Paste a secret key or an `otpauth://` link and get the current code. Long keys w
 - Paste an `otpauth://totp/...` link to fill in every field.
 - QR code for adding a key to an authenticator app.
 - Optional encrypted vault for saved keys, with encrypted backup export and import.
-- Light and dark themes.
+- Light, dark or system theme. The choice stays in this browser for Tick only.
 
 ## Privacy and security
 
@@ -31,6 +31,7 @@ See the [terms](https://totp.devhelper.my.id/terms) and [privacy](https://totp.d
 | `web/` | Tick, the web app (Vite, React, TypeScript, Tailwind). |
 | `web/src/lib/` | TOTP, base32, otpauth, vault and legacy-migration logic, with tests. |
 | `web/public/_headers` | CSP and security headers. |
+| `web/src/devhelper-theme/`, `web/public/devhelper-theme.js` | The shared DevHelper theme (tokens, fonts, theme control), generated from the DevHelper landing repo. Do not edit by hand; `node web/src/devhelper-theme/check.mjs` checks the copy. |
 | `published/` | The old single-file page. Kept for reference; not deployed by the new setup. |
 | `index.js` | A small Node CLI demo that prints a TOTP code and a QR code in the terminal. |
 

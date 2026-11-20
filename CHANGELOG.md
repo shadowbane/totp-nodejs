@@ -7,6 +7,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.2.0] - 2026-11-20
+
+### Changed
+
+- Tick uses the shared DevHelper theme: the same colours, fonts and controls as the other DevHelper sites, with Tick's violet accent.
+- The theme control has three choices: light, dark or system. The choice is kept in this browser for Tick only, never in a cookie, so nothing leaves the page. A choice saved by an earlier version is carried over.
+- Fonts come from the theme's own files (still served from this site, SIL Open Font License); the `@fontsource` packages are no longer used.
+
+### Removed
+
+- `web/public/theme.js`, replaced by `web/public/devhelper-theme.js`.
+
 ## [2.1.0] - 2026-11-18
 
 ### Added
@@ -66,7 +78,8 @@ The web tool is renamed **Tick** and joins the DevHelper suite. It stays at <htt
 - Node CLI (`index.js`) that generates a TOTP secret, prints the current code every 30 seconds, and shows an `otpauth://` QR code in the terminal.
 - A single-page browser generator (`published/index.html`) followed later, untagged.
 
-[Unreleased]: https://github.com/shadowbane/totp-nodejs/compare/v2.1.0...HEAD
+[Unreleased]: https://github.com/shadowbane/totp-nodejs/compare/v2.2.0...HEAD
+[2.2.0]: https://github.com/shadowbane/totp-nodejs/compare/v2.1.0...v2.2.0
 [2.1.0]: https://github.com/shadowbane/totp-nodejs/compare/v2.0.0...v2.1.0
 [2.0.0]: https://github.com/shadowbane/totp-nodejs/compare/v1.0.0...v2.0.0
 [1.0.0]: https://github.com/shadowbane/totp-nodejs/releases/tag/v1.0.0
